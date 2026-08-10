@@ -198,6 +198,9 @@
     border-radius:10px;padding:9px 12px;font-size:13.5px;font-weight:600;text-decoration:none;margin-top:6px;
     word-break:break-all;
   }
+  .tool-shop-link{
+    display:inline-block;color:var(--bread);font-weight:700;font-size:12.5px;text-decoration:none;margin-top:3px;
+  }
   .link-btn{background:none;border:none;color:var(--bread);font-weight:700;font-size:13.5px;padding:0;}
   .thumb{width:52px;height:52px;border-radius:9px;object-fit:cover;flex-shrink:0;border:1px solid var(--line);}
   .entry-top{display:flex;gap:10px;justify-content:space-between;}
@@ -280,23 +283,23 @@ const GETTING_STARTED_STEPS = [
 ];
 
 const TOOLS_ESSENTIAL = [
-  ['⚖️','Digital kitchen scale','Accurate to 1g — baker\'s percentages depend on it.'],
-  ['🥣','Large mixing bowl','For autolyse and bulk fermentation.'],
-  ['🔪','Bench scraper','For dividing, moving, and cleaning up dough.'],
-  ['🧺','Banneton (or a bowl + floured towel)','Holds shape during the final proof.'],
-  ['🪒','Sharp blade or bread lame','For scoring right before baking.'],
-  ['🍲','Dutch oven, combo cooker, or baking stone + steam pan','Traps steam for a good oven spring and crust.'],
-  ['🌡️','Oven thermometer','Most home ovens run hotter or cooler than the dial says.'],
-  ['🫙','Clear jar with a rubber band','Marks your starter\'s rise so you can see when it peaks.']
+  ['⚖️','Digital kitchen scale','Accurate to 1g — baker\'s percentages depend on it.','digital kitchen scale grams'],
+  ['🥣','Large mixing bowl','For autolyse and bulk fermentation.','large mixing bowl'],
+  ['🔪','Bench scraper','For dividing, moving, and cleaning up dough.','dough bench scraper'],
+  ['🧺','Banneton (or a bowl + floured towel)','Holds shape during the final proof.','banneton proofing basket'],
+  ['🪒','Sharp blade or bread lame','For scoring right before baking.','bread lame scoring tool'],
+  ['🍲','Dutch oven, combo cooker, or baking stone + steam pan','Traps steam for a good oven spring and crust.','dutch oven for bread baking'],
+  ['🌡️','Oven thermometer','Most home ovens run hotter or cooler than the dial says.','oven thermometer'],
+  ['🫙','Clear jar with a rubber band','Marks your starter\'s rise so you can see when it peaks.','wide mouth glass jar with lid']
 ];
 
 const TOOLS_NICE = [
-  ['🔌','Stand mixer with dough hook','Speeds up mixing, not required for hand-kneading methods.'],
-  ['📦','Proofing box or a warm spot with a thermometer','More consistent fermentation temps year-round.'],
-  ['🌡️','Instant-read thermometer','Checks dough temp and finished internal temp.'],
-  ['🧵','Couche (linen cloth)','Great for baguettes and batards.'],
-  ['🧪','pH strips','For bakers who want to track fermentation more precisely.'],
-  ['🧺','A second banneton in a different shape','Lets you switch between boules and batards.']
+  ['🔌','Stand mixer with dough hook','Speeds up mixing, not required for hand-kneading methods.','stand mixer with dough hook'],
+  ['📦','Proofing box or a warm spot with a thermometer','More consistent fermentation temps year-round.','bread proofing box'],
+  ['🌡️','Instant-read thermometer','Checks dough temp and finished internal temp.','instant read thermometer'],
+  ['🧵','Couche (linen cloth)','Great for baguettes and batards.','bakers couche linen'],
+  ['🧪','pH strips','For bakers who want to track fermentation more precisely.','ph test strips'],
+  ['🧺','A second banneton in a different shape','Lets you switch between boules and batards.','oval banneton proofing basket']
 ];
 
 const GLOSSARY = [
@@ -398,6 +401,10 @@ function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function nl2br(s){ return escapeHtml(s).replace(/\n/g,'<br>'); }
+
+function amazonSearchUrl(term){
+  return 'https://www.amazon.com/s?k=' + encodeURIComponent(term);
+}
 
 function entryStatus(entry){
   if(!entry.followUps || entry.followUps.length===0) return 'awaiting';
@@ -1347,14 +1354,14 @@ function renderStart(){
     <div class="card">
       <h3>Essential tools</h3>
       <ul class="tool-list">
-        ${TOOLS_ESSENTIAL.map(([icon,name,desc])=>`<li><span>${icon}</span><div><strong>${escapeHtml(name)}</strong><br><span style="color:var(--muted);font-size:13px;">${escapeHtml(desc)}</span></div></li>`).join('')}
+        ${TOOLS_ESSENTIAL.map(([icon,name,desc,search])=>`<li><span>${icon}</span><div><strong>${escapeHtml(name)}</strong><br><span style="color:var(--muted);font-size:13px;">${escapeHtml(desc)}</span><br><a class="tool-shop-link" href="${amazonSearchUrl(search)}" target="_blank" rel="noopener">🛒 Shop options →</a></div></li>`).join('')}
       </ul>
     </div>
 
     <div class="card">
       <h3>Nice to have</h3>
       <ul class="tool-list">
-        ${TOOLS_NICE.map(([icon,name,desc])=>`<li><span>${icon}</span><div><strong>${escapeHtml(name)}</strong><br><span style="color:var(--muted);font-size:13px;">${escapeHtml(desc)}</span></div></li>`).join('')}
+        ${TOOLS_NICE.map(([icon,name,desc,search])=>`<li><span>${icon}</span><div><strong>${escapeHtml(name)}</strong><br><span style="color:var(--muted);font-size:13px;">${escapeHtml(desc)}</span><br><a class="tool-shop-link" href="${amazonSearchUrl(search)}" target="_blank" rel="noopener">🛒 Shop options →</a></div></li>`).join('')}
       </ul>
     </div>
 
