@@ -508,7 +508,7 @@ async function handleAuthSubmit(e){
   if(btn){ btn.disabled = true; btn.textContent = 'Please wait…'; }
   try{
     if(authMode === 'signup'){
-      const { data, error } = await sb.auth.signUp({ email, password });
+      const { data, error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: window.location.href } });
       if(error) throw error;
       if(data.session){
         currentSession = data.session;
@@ -535,7 +535,7 @@ async function handleAuthSubmit(e){
 async function handleForgotPassword(){
   const email = (document.getElementById('authEmail').value || '').trim();
   if(!email){ alert('Enter your email above first, then tap "Forgot password?" again.'); return; }
-  const { error } = await sb.auth.resetPasswordForEmail(email);
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
   if(error){ alert('Could not send reset email: '+error.message); return; }
   alert('Password reset email sent to '+email+'.');
 }
