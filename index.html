@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#8a5a3b">
+<title>Sourdough Companion</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-title" content="Sourdough">
+<style>
+  :root{
+    --bread:#8a5a3b;
+    --bread-dark:#6b4429;
+    --crust:#c98a4b;
+    --cream:#faf3e8;
+    --cream-2:#f2e6d2;
+    --ink:#3a2e24;
+    --muted:#8a7a68;
+    --line:#e3d5bf;
+    --good:#4a7c4e;
+    --warn:#c9862f;
+    --info:#4a6f8a;
+    --danger:#b0503f;
+    --white:#fff;
+    --radius:14px;
+    --shadow:0 2px 10px rgba(58,46,36,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    padding-bottom:76px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  h1,h2,h3,h4{margin:0 0 8px 0;font-weight:700;color:var(--bread-dark);}
+  p{margin:0 0 10px 0;line-height:1.5;}
+  a{color:var(--bread);}
+  button{font-family:inherit;cursor:pointer;}
+  .app-header{
+    position:sticky;top:0;z-index:20;
+    background:linear-gradient(135deg,var(--bread),var(--bread-dark));
+    color:#fff;padding:14px 16px;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:var(--shadow);
+  }
+  .app-header .brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;}
+  .app-header .brand .logo{font-size:24px;}
+  .icon-btn{
+    background:rgba(255,255,255,0.15);border:none;color:#fff;
+    width:38px;height:38px;border-radius:10px;font-size:18px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  main{max-width:920px;margin:0 auto;padding:16px;}
+  .card{
+    background:var(--white);border-radius:var(--radius);
+    padding:16px;box-shadow:var(--shadow);margin-bottom:14px;
+    border:1px solid var(--line);
+  }
+  .card-tap{cursor:pointer;}
+  .card-tap:active{transform:scale(0.99);}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  @media (max-width:520px){.grid-3{grid-template-columns:repeat(2,1fr);}}
+  .stat{
+    background:var(--cream-2);border-radius:12px;padding:12px;text-align:center;
+  }
+  .stat .num{font-size:24px;font-weight:800;color:var(--bread-dark);}
+  .stat .lab{font-size:12px;color:var(--muted);margin-top:2px;}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    background:var(--bread);color:#fff;border:none;border-radius:10px;
+    padding:11px 16px;font-size:14.5px;font-weight:600;
+  }
+  .btn.secondary{background:var(--cream-2);color:var(--bread-dark);}
+  .btn.danger{background:var(--danger);color:#fff;}
+  .btn.block{width:100%;}
+  .btn.small{padding:7px 12px;font-size:13px;}
+  .btn:disabled{opacity:0.5;}
+  .quick-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  .tag{
+    display:inline-block;background:var(--cream-2);color:var(--bread-dark);
+    border-radius:999px;padding:4px 10px;font-size:12px;margin:2px 4px 2px 0;
+    border:1px solid var(--line);
+  }
+  .badge{
+    display:inline-block;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700;
+    letter-spacing:0.2px;
+  }
+  .badge.awaiting{background:#f4e1c6;color:#8a5a1a;}
+  .badge.progress{background:#dce8f5;color:#2c5a82;}
+  .badge.resolved{background:#dcefdd;color:#2e6b32;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--bread-dark);margin-bottom:5px;}
+  .field .hint{font-size:12px;color:var(--muted);margin-top:4px;}
+  input[type=text],input[type=date],input[type=number],input[type=password],select,textarea{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+    font-size:15px;font-family:inherit;background:#fff;color:var(--ink);
+  }
+  textarea{resize:vertical;min-height:70px;}
+  .checkbox-grid{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip-check{
+    border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:13.5px;
+    background:#fff;color:var(--ink);
+  }
+  .chip-check.checked{background:var(--bread);color:#fff;border-color:var(--bread);}
+  .photo-preview{
+    max-width:100%;max-height:220px;border-radius:10px;margin-top:8px;display:block;border:1px solid var(--line);
+  }
+  .section-title{
+    display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px 0;
+  }
+  .section-title h2{margin:0;font-size:17px;}
+  .empty-state{
+    text-align:center;padding:34px 16px;color:var(--muted);
+  }
+  .empty-state .big{font-size:38px;margin-bottom:8px;}
+  .back-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .back-row .btn{padding:8px 12px;}
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(58,46,36,0.5);z-index:50;
+    display:flex;align-items:flex-end;justify-content:center;
+  }
+  @media (min-width:640px){.modal-overlay{align-items:center;}}
+  .modal{
+    background:#fff;border-radius:18px 18px 0 0;padding:20px;max-width:520px;width:100%;
+    max-height:85vh;overflow-y:auto;
+  }
+  @media (min-width:640px){.modal{border-radius:18px;}}
+  .modal-close{float:right;background:none;border:none;font-size:20px;color:var(--muted);}
+  .followup-item{
+    border-left:3px solid var(--line);padding:8px 0 8px 12px;margin-bottom:10px;
+  }
+  .followup-item.solved{border-left-color:var(--good);}
+  .followup-item .fdate{font-size:12px;color:var(--muted);font-weight:700;}
+  .lib-item{border-bottom:1px solid var(--line);padding:14px 0;}
+  .lib-item:last-child{border-bottom:none;}
+  .lib-item h4{margin-bottom:6px;}
+  .lib-item ul{margin:6px 0 0 18px;padding:0;}
+  .lib-item ul li{margin-bottom:4px;font-size:14px;}
+  .tool-list{list-style:none;margin:0;padding:0;}
+  .tool-list li{
+    display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14.5px;
+  }
+  .tool-list li:last-child{border-bottom:none;}
+  .step-num{
+    background:var(--bread);color:#fff;width:26px;height:26px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;
+    flex-shrink:0;
+  }
+  .step{display:flex;gap:12px;margin-bottom:16px;}
+  .step .step-body{flex:1;}
+  .step .step-body h4{margin-bottom:3px;}
+  .search-box{margin-bottom:14px;}
+  .bottom-nav{
+    position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);
+    display:flex;z-index:30;box-shadow:0 -2px 10px rgba(0,0,0,0.06);
+  }
+  .bottom-nav button{
+    flex:1;background:none;border:none;padding:9px 2px 8px;display:flex;flex-direction:column;
+    align-items:center;gap:2px;color:var(--muted);font-size:10.5px;font-weight:600;
+  }
+  .bottom-nav button .ic{font-size:19px;}
+  .bottom-nav button.active{color:var(--bread);}
+  .ingredient-row{display:flex;gap:8px;margin-bottom:8px;}
+  .ingredient-row input{flex:1;}
+  .step-row{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start;}
+  .step-row .step-num{margin-top:9px;}
+  .step-row textarea{flex:1;min-height:44px;}
+  .remove-row{
+    background:var(--cream-2);border:none;border-radius:8px;width:34px;height:34px;color:var(--danger);
+    font-size:16px;flex-shrink:0;
+  }
+  .toast{
+    position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+    padding:10px 18px;border-radius:999px;font-size:13.5px;z-index:60;box-shadow:var(--shadow);
+  }
+  .divider{height:1px;background:var(--line);margin:16px 0;}
+  .recipe-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:8px;}
+  .filter-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .filter-tab{
+    border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;
+    padding:6px 13px;font-size:13px;font-weight:600;
+  }
+  .filter-tab.active{background:var(--bread-dark);color:#fff;border-color:var(--bread-dark);}
+  .web-badge{
+    display:inline-flex;align-items:center;gap:4px;background:#e6eef5;color:#2c5a82;
+    border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700;margin-bottom:6px;
+  }
+  .source-link{
+    display:inline-flex;align-items:center;gap:6px;background:var(--cream-2);color:var(--bread-dark);
+    border-radius:10px;padding:9px 12px;font-size:13.5px;font-weight:600;text-decoration:none;margin-top:6px;
+    word-break:break-all;
+  }
+  .link-btn{background:none;border:none;color:var(--bread);font-weight:700;font-size:13.5px;padding:0;}
+  .thumb{width:52px;height:52px;border-radius:9px;object-fit:cover;flex-shrink:0;border:1px solid var(--line);}
+  .entry-top{display:flex;gap:10px;justify-content:space-between;}
+  .entry-top .meta{flex:1;min-width:0;}
+  .entry-top .meta h4{margin-bottom:3px;font-size:15px;}
+  .entry-date{font-size:12px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand"><span class="logo">🍞</span> Sourdough Companion</div>
+  <button class="icon-btn" onclick="openSettings()" title="Backup / Settings">⚙️</button>
+</header>
+
+<main id="app"></main>
+
+<nav class="bottom-nav" id="bottomNav"></nav>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+/* ============================= SUPABASE ============================= */
+
+const SUPABASE_URL = 'https://jnxlssroawykqlbsedgf.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_Tdy2A0aIKLCtZsEBU8pN2Q_c1mH42D-';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const PHOTOS_BUCKET = 'sourdough-photos';
+
+/* ============================= DATA ============================= */
+
+const SYMPTOM_LIBRARY = [
+  { id:'dense-crumb', symptom:'Dense, tight crumb (not much rise)',
+    causes:['Starter not active enough at time of mixing','Under-proofed dough','Dough was too tight / under-hydrated','Too much whole grain flour without adjusting hydration','Weak gluten development'],
+    fixes:['Do a float test before mixing — starter should double and float','Judge bulk fermentation by volume (30-50% rise), not the clock','Increase hydration slightly and handle dough gently','Add more stretch-and-folds during bulk fermentation'] },
+  { id:'gummy-crumb', symptom:'Gummy or wet-feeling interior',
+    causes:['Under-baked — pulled out too early','Sliced into the loaf before it fully cooled','Over-proofed dough that lost structure','Too much hydration for your current technique'],
+    fixes:['Bake to an internal temp of 205-210°F using a probe thermometer','Let the loaf cool fully (2+ hours) before slicing','Shorten bulk or cold-proof time next bake','Dial back hydration 3-5%'] },
+  { id:'flat-loaf', symptom:'Flat, spread-out loaf (no height)',
+    causes:['Over-proofed dough','Weak gluten structure from under-mixing/folding','Shaping too loose','Underpowered starter'],
+    fixes:['Shorten proof time — use the poke test (slow spring-back = ready)','Add more folds during bulk fermentation','Shape with more surface tension','Feed starter 1-2 more times and use it at peak activity'] },
+  { id:'oven-spring', symptom:'Little to no oven spring',
+    causes:['Under- or over-proofed dough','Oven (and baking vessel) not fully preheated','No steam during the first bake phase','Scoring too shallow or done too late','Weak starter'],
+    fixes:['Preheat oven + Dutch oven for 45-60 minutes before baking','Score confidently at a 30-45° angle right before it goes in','Bake covered for the first ~20 minutes to trap steam','Dial in proof timing with the poke test'] },
+  { id:'pale-crust', symptom:'Pale, soft crust',
+    causes:['Not enough fermentation to build sugars for browning','Cover removed too early / not enough dry heat at the end','Oven running cooler than the dial says'],
+    fixes:['Bake uncovered for the last 15-20 minutes at full temp','Verify oven temp with a separate oven thermometer','Try an egg wash or a light steam finish for extra color'] },
+  { id:'dark-crust', symptom:'Crust too dark or burnt (especially the bottom)',
+    causes:['Oven running hot','Baked too long uncovered','Baking vessel placed too low / close to the heat source','A dark baking vessel absorbing extra heat'],
+    fixes:['Lower the temp 15-20°F and confirm with an oven thermometer','Move the rack to the middle position','Trim uncovered bake time in 5-minute increments'] },
+  { id:'flavor-sour', symptom:'Too sour / harsh flavor',
+    causes:['Long cold retard building extra acidity','Starter overly acidic from infrequent feeding','Warm bulk fermentation favoring acetic acid bacteria'],
+    fixes:['Shorten the cold retard to 8-12 hours','Feed starter more frequently (1-2x/day) leading up to the bake','Keep bulk fermentation a bit cooler'] },
+  { id:'flavor-bland', symptom:'Bland, flat flavor',
+    causes:['Fermentation too short','Starter not mature or active enough','Not enough salt'],
+    fixes:['Extend bulk fermentation or add a 12-24 hour cold retard','Let the starter develop longer before using it','Confirm salt is around 2% of flour weight'] },
+  { id:'sticky-dough', symptom:'Dough too sticky / hard to shape',
+    causes:['Hydration too high for your flour or current skill level','Not enough gluten development','Over-proofed dough gone slack'],
+    fixes:['Lower hydration 3-5% next bake','Add more folds or coil folds during bulk','Wet your hands and use a bench scraper generously when shaping'] },
+  { id:'blowout', symptom:'Dough tears or blows out on the side',
+    causes:['Shaping seam not sealed well','Scoring too shallow, so the dough finds a weak spot instead','Uneven tension in the shaped loaf'],
+    fixes:['Pinch and fully seal the seam when shaping','Score deeper (1/4"-1/2") at a clean, consistent angle','Practice building even tension across the whole loaf'] },
+  { id:'starter-weak', symptom:'Starter not rising / sluggish',
+    causes:['Feeding ratio too low for how fast it eats','Water too cold or heavily chlorinated','Starter still young (under 2-3 weeks old)','Room temperature too cool'],
+    fixes:['Feed at a 1:1:1 or 1:2:2 ratio (starter:flour:water) by weight','Use filtered or dechlorinated water','Move it somewhere warmer (75-80°F), like the oven with just the light on','Be patient — new starters can take 2-4 weeks to stabilize'] },
+  { id:'gummy-bottom', symptom:'Gummy or dense bottom crust only',
+    causes:['Baked on a sheet pan without enough bottom heat','Loaf pulled from the oven too soon','Steam trapped too long with no dry-heat finish'],
+    fixes:['Bake on a preheated stone/steel or in a Dutch oven for stronger bottom heat','Confirm doneness with internal temp, not just crust color','Finish uncovered so the bottom can fully dry out'] }
+];
+
+const GETTING_STARTED_STEPS = [
+  { title:'Build or acquire a starter', body:'Mix equal parts flour and water and feed daily for 7-14 days until it reliably doubles in 4-8 hours — or ask a fellow baker for a spoonful of theirs to skip the wait.' },
+  { title:'Learn to feed and maintain it', body:'Room temp: feed daily at roughly a 1:1:1 ratio (starter:flour:water by weight). Fridge storage: feed weekly and pull it out to warm up and feed 1-2x before baking.' },
+  { title:'Run a float test', body:'Drop a small spoonful of starter in water right after feeding, once active. If it floats, it\'s ready to leaven a dough.' },
+  { title:'Bake a simple first loaf', body:'Start with a basic ~75% hydration boule before branching into higher hydration or whole grain loaves.' },
+  { title:'Learn the core techniques', body:'Autolyse, bulk fermentation, stretch & folds, shaping, scoring, and baking with steam — get comfortable with each before adding variables.' },
+  { title:'Log every bake here', body:'Even the good ones. Patterns only show up once you have a few entries to compare.' }
+];
+
+const TOOLS_ESSENTIAL = [
+  ['⚖️','Digital kitchen scale','Accurate to 1g — baker\'s percentages depend on it.'],
+  ['🥣','Large mixing bowl','For autolyse and bulk fermentation.'],
+  ['🔪','Bench scraper','For dividing, moving, and cleaning up dough.'],
+  ['🧺','Banneton (or a bowl + floured towel)','Holds shape during the final proof.'],
+  ['🪒','Sharp blade or bread lame','For scoring right before baking.'],
+  ['🍲','Dutch oven, combo cooker, or baking stone + steam pan','Traps steam for a good oven spring and crust.'],
+  ['🌡️','Oven thermometer','Most home ovens run hotter or cooler than the dial says.'],
+  ['🫙','Clear jar with a rubber band','Marks your starter\'s rise so you can see when it peaks.']
+];
+
+const TOOLS_NICE = [
+  ['🔌','Stand mixer with dough hook','Speeds up mixing, not required for hand-kneading methods.'],
+  ['📦','Proofing box or a warm spot with a thermometer','More consistent fermentation temps year-round.'],
+  ['🌡️','Instant-read thermometer','Checks dough temp and finished internal temp.'],
+  ['🧵','Couche (linen cloth)','Great for baguettes and batards.'],
+  ['🧪','pH strips','For bakers who want to track fermentation more precisely.'],
+  ['🧺','A second banneton in a different shape','Lets you switch between boules and batards.']
+];
+
+const GLOSSARY = [
+  ['Autolyse','Resting flour and water (no starter/salt yet) before mixing, to jump-start gluten development.'],
+  ['Bulk fermentation','The first rise, right after mixing, where most flavor and structure develops.'],
+  ['Levain / starter','The wild yeast + bacteria culture that leavens the dough.'],
+  ['Hydration %','Water weight ÷ flour weight × 100 — a shorthand for how wet a dough is.'],
+  ['Oven spring','The rapid rise a loaf gets in the first several minutes of baking.'],
+  ['Scoring','Cutting the surface of the dough so it expands in a controlled way.'],
+  ['Banneton','A proofing basket that holds the loaf\'s shape during final proof.'],
+  ['Poke test','Poke the dough — slow, partial spring-back means it\'s ready to bake.'],
+  ['Float test','Drop starter in water; floating means it\'s active enough to use.'],
+  ['Cold retard','Slowing fermentation in the fridge, often overnight, to deepen flavor.']
+];
+
+/* ============================= STATE ============================= */
+
+let state = { recipes: [], logs: [] };
+let currentView = 'home';
+let currentEntryId = null;
+let currentRecipeId = null;
+let pendingPhoto = null; // for new-entry form
+let pendingFollowupPhoto = null;
+let pendingRecipePhoto = null;
+let selectedSymptoms = [];
+let recipeIngredientRows = [];
+let recipeStepRows = [];
+let guideSearch = '';
+let recipeFilter = 'all'; // 'all' | 'web' | 'own'
+let currentUser = null;
+let currentSession = null;
+let authMode = 'signin'; // 'signin' | 'signup'
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+/* ============================= SUPABASE DATA LAYER ============================= */
+
+async function loadData(){
+  if(!currentUser) return;
+  try{
+    const [recipesRes, logsRes] = await Promise.all([
+      sb.from('sourdough_recipes')
+        .select('id,title,category,hydration,sourceName:source_name,sourceUrl:source_url,ingredients,steps,notes,photo:photo_url')
+        .order('title'),
+      sb.from('sourdough_logs')
+        .select('id,date:log_date,title,recipeId:recipe_id,symptoms,description,myCauseNotes:my_cause_notes,suggestedCauses:suggested_causes,plannedChange:planned_change,photo:photo_url,followUps:sourdough_followups(id,date:followup_date,result,notes,photo:photo_url)')
+        .order('log_date', { ascending:false })
+    ]);
+    if(recipesRes.error) throw recipesRes.error;
+    if(logsRes.error) throw logsRes.error;
+    const recipes = recipesRes.data || [];
+    const logs = logsRes.data || [];
+    logs.forEach(l => {
+      l.recipeName = l.recipeId ? ((recipes.find(r=>r.id===l.recipeId)||{}).title || null) : null;
+      if(l.followUps) l.followUps.sort((a,b)=> (a.date||'').localeCompare(b.date||''));
+    });
+    state.recipes = recipes;
+    state.logs = logs;
+  }catch(err){
+    console.error(err);
+    showToast('⚠️ Could not load your data — check your connection.');
+  }
+  render();
+}
+
+// Converts a data: URL (from the resize/preview step) into a Blob and uploads
+// it to the user's folder in Supabase Storage, returning a public URL.
+async function uploadPendingPhoto(dataUrl, folder){
+  if(!dataUrl) return null;
+  if(!dataUrl.startsWith('data:')) return dataUrl; // already a hosted URL — nothing to do
+  try{
+    const blob = await (await fetch(dataUrl)).blob();
+    const path = currentUser.id + '/' + folder + '/' + uid() + '.jpg';
+    const { error } = await sb.storage.from(PHOTOS_BUCKET).upload(path, blob, { contentType:'image/jpeg', upsert:true });
+    if(error) throw error;
+    const { data } = sb.storage.from(PHOTOS_BUCKET).getPublicUrl(path);
+    return data.publicUrl;
+  }catch(err){
+    console.error(err);
+    showToast('⚠️ Photo upload failed — saved without it.');
+    return null;
+  }
+}
+
+/* ============================= HELPERS ============================= */
+
+function fmtDate(d){
+  if(!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  if(isNaN(dt)) return d;
+  return dt.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+}
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function escapeHtml(s){
+  if(s===undefined||s===null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function nl2br(s){ return escapeHtml(s).replace(/\n/g,'<br>'); }
+
+function entryStatus(entry){
+  if(!entry.followUps || entry.followUps.length===0) return 'awaiting';
+  const last = entry.followUps[entry.followUps.length-1];
+  if(last.result === 'solved') return 'resolved';
+  return 'progress';
+}
+function statusLabel(s){
+  return s==='awaiting' ? 'Awaiting change' : s==='progress' ? 'In progress' : 'Resolved';
+}
+
+function showToast(msg){
+  const root = document.getElementById('toastRoot');
+  root.innerHTML = '<div class="toast">'+escapeHtml(msg)+'</div>';
+  setTimeout(()=>{ root.innerHTML=''; }, 2400);
+}
+
+function resizeImage(file, callback){
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      const maxW = 800;
+      const scale = Math.min(1, maxW / img.width);
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', 0.72));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ============================= NAV ============================= */
+
+const NAV_ITEMS = [
+  {id:'home', icon:'🏠', label:'Home'},
+  {id:'mybakes', icon:'📝', label:'My Bakes'},
+  {id:'recipes', icon:'📖', label:'Recipes'},
+  {id:'guide', icon:'🔍', label:'Guide'},
+  {id:'start', icon:'🎓', label:'Start Here'}
+];
+
+function renderNav(){
+  const nav = document.getElementById('bottomNav');
+  nav.innerHTML = NAV_ITEMS.map(item => (
+    '<button class="'+(currentView===item.id||(item.id==='mybakes'&&['entryDetail','newEntry'].includes(currentView))||(item.id==='recipes'&&currentView==='recipeForm')?'active':'')+'" onclick="goTo(\''+item.id+'\')">'+
+      '<span class="ic">'+item.icon+'</span><span>'+item.label+'</span>'+
+    '</button>'
+  )).join('');
+}
+
+function goTo(view){
+  currentView = view;
+  currentEntryId = null;
+  currentRecipeId = null;
+  window.scrollTo(0,0);
+  render();
+}
+
+/* ============================= AUTH ============================= */
+
+function renderAuthScreen(){
+  const isSignup = authMode === 'signup';
+  return `
+    <div class="card" style="max-width:380px;margin:40px auto 0;">
+      <div style="text-align:center;margin-bottom:2px;font-size:40px;">🍞</div>
+      <h2 style="text-align:center;">Sourdough Companion</h2>
+      <p style="text-align:center;color:var(--muted);">${isSignup ? 'Create an account to sync your bakes and recipes on every device.' : 'Sign in to see your bakes and recipes.'}</p>
+      <form onsubmit="handleAuthSubmit(event)">
+        <div class="field">
+          <label>Email</label>
+          <input type="text" id="authEmail" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="authPassword" placeholder="${isSignup ? 'At least 6 characters' : 'Your password'}" autocomplete="${isSignup?'new-password':'current-password'}" minlength="6" required>
+        </div>
+        <div id="authMsg"></div>
+        <button type="submit" class="btn block">${isSignup ? 'Create account' : 'Sign in'}</button>
+      </form>
+      <div style="text-align:center;margin-top:14px;font-size:13.5px;">
+        ${isSignup
+          ? 'Already have an account? <button type="button" class="link-btn" onclick="switchAuthMode(\'signin\')">Sign in</button>'
+          : 'New here? <button type="button" class="link-btn" onclick="switchAuthMode(\'signup\')">Create an account</button>'}
+      </div>
+      ${!isSignup ? '<div style="text-align:center;margin-top:8px;"><button type="button" class="link-btn" onclick="handleForgotPassword()">Forgot password?</button></div>' : ''}
+    </div>
+  `;
+}
+
+function switchAuthMode(mode){
+  authMode = mode;
+  render();
+}
+
+async function handleAuthSubmit(e){
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const btn = e.target.querySelector('button[type=submit]');
+  const msgEl = document.getElementById('authMsg');
+  msgEl.innerHTML = '';
+  if(btn){ btn.disabled = true; btn.textContent = 'Please wait…'; }
+  try{
+    if(authMode === 'signup'){
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if(error) throw error;
+      if(data.session){
+        currentSession = data.session;
+        currentUser = data.user;
+        await loadData();
+      } else {
+        authMode = 'signin';
+        render();
+        document.getElementById('authMsg').innerHTML = '<p style="color:var(--good);font-size:13.5px;margin-top:8px;">Account created — check your email to confirm it, then sign in here.</p>';
+      }
+    } else {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if(error) throw error;
+      currentSession = data.session;
+      currentUser = data.user;
+      await loadData();
+    }
+  }catch(err){
+    msgEl.innerHTML = '<p style="color:var(--danger);font-size:13.5px;margin-top:8px;">'+escapeHtml(err.message || 'Something went wrong.')+'</p>';
+    if(btn){ btn.disabled = false; btn.textContent = authMode==='signup' ? 'Create account' : 'Sign in'; }
+  }
+}
+
+async function handleForgotPassword(){
+  const email = (document.getElementById('authEmail').value || '').trim();
+  if(!email){ alert('Enter your email above first, then tap "Forgot password?" again.'); return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email);
+  if(error){ alert('Could not send reset email: '+error.message); return; }
+  alert('Password reset email sent to '+email+'.');
+}
+
+async function handleSignOut(){
+  closeModal();
+  await sb.auth.signOut();
+}
+
+async function initAuth(){
+  const { data: { session } } = await sb.auth.getSession();
+  currentSession = session;
+  currentUser = session ? session.user : null;
+  if(currentUser){ await loadData(); } else { render(); }
+
+  sb.auth.onAuthStateChange((event, newSession) => {
+    const wasSignedIn = !!currentUser;
+    currentSession = newSession;
+    currentUser = newSession ? newSession.user : null;
+    if(currentUser && !wasSignedIn){
+      loadData();
+    } else if(!currentUser && wasSignedIn){
+      state = { recipes:[], logs:[] };
+      currentView = 'home';
+      render();
+    }
+  });
+}
+
+/* ============================= RENDER ROOT ============================= */
+
+function render(){
+  const app = document.getElementById('app');
+  if(!currentUser){
+    app.innerHTML = renderAuthScreen();
+    document.getElementById('bottomNav').innerHTML = '';
+    return;
+  }
+  if(currentView==='home') app.innerHTML = renderHome();
+  else if(currentView==='mybakes') app.innerHTML = renderMyBakes();
+  else if(currentView==='entryDetail') app.innerHTML = renderEntryDetail();
+  else if(currentView==='newEntry') app.innerHTML = renderNewEntry();
+  else if(currentView==='recipes') app.innerHTML = renderRecipes();
+  else if(currentView==='recipeForm') app.innerHTML = renderRecipeForm();
+  else if(currentView==='guide') app.innerHTML = renderGuide();
+  else if(currentView==='start') app.innerHTML = renderStart();
+  renderNav();
+}
+
+/* ============================= HOME ============================= */
+
+function renderHome(){
+  const total = state.logs.length;
+  const awaiting = state.logs.filter(e=>entryStatus(e)==='awaiting').length;
+  const progress = state.logs.filter(e=>entryStatus(e)==='progress').length;
+  const resolved = state.logs.filter(e=>entryStatus(e)==='resolved').length;
+  const recent = [...state.logs].sort((a,b)=> (b.date||'').localeCompare(a.date||'')).slice(0,3);
+
+  return `
+    <div class="card">
+      <h2 style="margin-bottom:4px;">Welcome back 👋</h2>
+      <p style="color:var(--muted);">Log what went wrong, track the fix, and see what actually worked over time.</p>
+      <div class="quick-actions">
+        <button class="btn" onclick="startNewEntry()">📝 Log a bake</button>
+        <button class="btn secondary" onclick="startNewRecipe()">📖 Add recipe</button>
+        <button class="btn secondary" onclick="openSaveFromWebModal()">🌐 Save from web</button>
+        <button class="btn secondary" onclick="goTo('guide')">🔍 Browse guide</button>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="stat"><div class="num">${total}</div><div class="lab">Bakes logged</div></div>
+      <div class="stat"><div class="num">${awaiting+progress}</div><div class="lab">Open issues</div></div>
+      <div class="stat"><div class="num">${resolved}</div><div class="lab">Resolved</div></div>
+    </div>
+
+    <div class="section-title"><h2>Recent activity</h2>${recent.length? '<button class="link-btn" onclick="goTo(\'mybakes\')">See all</button>' : ''}</div>
+    ${recent.length ? recent.map(renderEntryCard).join('') : `
+      <div class="card empty-state">
+        <div class="big">🍞</div>
+        <p>No bakes logged yet. Start with your next one — even a quick note helps.</p>
+        <button class="btn" onclick="startNewEntry()">Log your first bake</button>
+      </div>
+    `}
+  `;
+}
+
+/* ============================= MY BAKES ============================= */
+
+function renderEntryCard(entry){
+  const status = entryStatus(entry);
+  const symptomNames = (entry.symptoms||[]).map(id => {
+    const lib = SYMPTOM_LIBRARY.find(s=>s.id===id);
+    return lib ? lib.symptom : id;
+  });
+  return `
+    <div class="card card-tap" onclick="openEntry('${entry.id}')">
+      <div class="entry-top">
+        <div class="meta">
+          <h4>${escapeHtml(entry.title || 'Untitled bake')}</h4>
+          <div class="entry-date">${fmtDate(entry.date)}${entry.recipeName? ' · '+escapeHtml(entry.recipeName): ''}</div>
+        </div>
+        ${entry.photo ? '<img class="thumb" src="'+entry.photo+'">' : ''}
+      </div>
+      <div style="margin-top:8px;">
+        <span class="badge ${status}">${statusLabel(status)}</span>
+      </div>
+      <div style="margin-top:8px;">
+        ${symptomNames.slice(0,3).map(s=>'<span class="tag">'+escapeHtml(s)+'</span>').join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderMyBakes(){
+  const sorted = [...state.logs].sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+  return `
+    <div class="section-title" style="margin-top:0;">
+      <h2>My Bakes</h2>
+      <button class="btn small" onclick="startNewEntry()">+ Log a bake</button>
+    </div>
+    ${sorted.length ? sorted.map(renderEntryCard).join('') : `
+      <div class="card empty-state">
+        <div class="big">📝</div>
+        <p>Nothing logged yet. When a bake doesn't go as planned (or even when it does), record it here.</p>
+        <button class="btn" onclick="startNewEntry()">Log a bake</button>
+      </div>
+    `}
+  `;
+}
+
+function openEntry(id){
+  currentEntryId = id;
+  currentView = 'entryDetail';
+  render();
+  window.scrollTo(0,0);
+}
+
+function renderEntryDetail(){
+  const entry = state.logs.find(e=>e.id===currentEntryId);
+  if(!entry) return '<div class="card">Entry not found. <button class="btn secondary" onclick="goTo(\'mybakes\')">Back</button></div>';
+  const status = entryStatus(entry);
+  const symptomNames = (entry.symptoms||[]).map(id=>{
+    const lib = SYMPTOM_LIBRARY.find(s=>s.id===id);
+    return lib ? lib.symptom : id;
+  });
+
+  return `
+    <div class="back-row">
+      <button class="btn secondary small" onclick="goTo('mybakes')">← Back</button>
+      <button class="btn danger small" onclick="deleteEntry('${entry.id}')" style="margin-left:auto;">Delete</button>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;gap:10px;">
+        <div>
+          <h2 style="margin-bottom:2px;">${escapeHtml(entry.title || 'Untitled bake')}</h2>
+          <div class="entry-date">${fmtDate(entry.date)}${entry.recipeName? ' · '+escapeHtml(entry.recipeName): ''}</div>
+        </div>
+        <span class="badge ${status}" style="height:fit-content;">${statusLabel(status)}</span>
+      </div>
+      ${entry.photo ? '<img class="photo-preview" src="'+entry.photo+'">' : ''}
+
+      ${symptomNames.length ? `
+        <div class="divider"></div>
+        <h4>Symptoms</h4>
+        <div>${symptomNames.map(s=>'<span class="tag">'+escapeHtml(s)+'</span>').join('')}</div>
+      ` : ''}
+
+      ${entry.description ? `
+        <div class="divider"></div>
+        <h4>What happened</h4>
+        <p>${nl2br(entry.description)}</p>
+      ` : ''}
+
+      ${(entry.suggestedCauses && entry.suggestedCauses.length) ? `
+        <div class="divider"></div>
+        <h4>Likely causes</h4>
+        <ul style="margin:0 0 0 18px;padding:0;">
+          ${entry.suggestedCauses.map(c=>'<li>'+escapeHtml(c)+'</li>').join('')}
+        </ul>
+      ` : ''}
+
+      ${entry.myCauseNotes ? `
+        <div class="divider"></div>
+        <h4>My notes on the cause</h4>
+        <p>${nl2br(entry.myCauseNotes)}</p>
+      ` : ''}
+
+      ${entry.plannedChange ? `
+        <div class="divider"></div>
+        <h4>What to change next time</h4>
+        <p>${nl2br(entry.plannedChange)}</p>
+      ` : ''}
+    </div>
+
+    <div class="section-title">
+      <h2>Follow-up results</h2>
+      <button class="btn small" onclick="openFollowupModal('${entry.id}')">+ Add follow-up</button>
+    </div>
+    ${ (entry.followUps && entry.followUps.length) ? entry.followUps.map(fu => `
+      <div class="card">
+        <div class="followup-item ${fu.result==='solved'?'solved':''}">
+          <div class="fdate">${fmtDate(fu.date)} · ${resultLabel(fu.result)}</div>
+          ${fu.notes ? '<p style="margin-top:4px;">'+nl2br(fu.notes)+'</p>' : ''}
+          ${fu.photo ? '<img class="photo-preview" src="'+fu.photo+'">' : ''}
+        </div>
+      </div>
+    `).join('') : `
+      <div class="card empty-state">
+        <p>No follow-up yet. After you try the change, come back and log how it went — that's what closes the loop.</p>
+      </div>
+    `}
+  `;
+}
+
+function resultLabel(r){
+  return r==='solved' ? '✅ Fully solved' : r==='better' ? '📈 Better' : r==='same' ? '➡️ About the same' : r==='worse' ? '📉 Worse' : r;
+}
+
+async function deleteEntry(id){
+  if(!confirm('Delete this bake log? This can\'t be undone.')) return;
+  const { error } = await sb.from('sourdough_logs').delete().eq('id', id);
+  if(error){ showToast('⚠️ Could not delete: '+error.message); return; }
+  showToast('Entry deleted');
+  await loadData();
+  goTo('mybakes');
+}
+
+/* ============================= NEW ENTRY FORM ============================= */
+
+function startNewEntry(prefillSymptom){
+  pendingPhoto = null;
+  selectedSymptoms = prefillSymptom ? [prefillSymptom] : [];
+  currentView = 'newEntry';
+  render();
+  window.scrollTo(0,0);
+}
+
+function toggleSymptom(id){
+  const i = selectedSymptoms.indexOf(id);
+  if(i>-1) selectedSymptoms.splice(i,1); else selectedSymptoms.push(id);
+  document.getElementById('symptomChecks').outerHTML = renderSymptomChecks();
+  document.getElementById('suggestedCausesPreview').innerHTML = renderSuggestedCausesPreview();
+}
+
+function renderSymptomChecks(){
+  return '<div class="checkbox-grid" id="symptomChecks">' +
+    SYMPTOM_LIBRARY.map(s => (
+      '<button type="button" class="chip-check '+(selectedSymptoms.includes(s.id)?'checked':'')+'" onclick="toggleSymptom(\''+s.id+'\')">'+escapeHtml(s.symptom)+'</button>'
+    )).join('') +
+  '</div>';
+}
+function renderSuggestedCausesPreview(){
+  const causes = [];
+  selectedSymptoms.forEach(id=>{
+    const lib = SYMPTOM_LIBRARY.find(s=>s.id===id);
+    if(lib) lib.causes.forEach(c=>{ if(!causes.includes(c)) causes.push(c); });
+  });
+  if(!causes.length) return '<p class="hint" style="color:var(--muted);">Select a symptom above to see likely causes.</p>';
+  return '<ul style="margin:0 0 0 18px;padding:0;">' + causes.map(c=>'<li style="font-size:14px;margin-bottom:4px;">'+escapeHtml(c)+'</li>').join('') + '</ul>';
+}
+
+function renderNewEntry(){
+  const recipeOptions = state.recipes.map(r=>'<option value="'+r.id+'">'+escapeHtml(r.title)+'</option>').join('');
+  return `
+    <div class="back-row"><button class="btn secondary small" onclick="goTo('mybakes')">← Cancel</button></div>
+    <div class="card">
+      <h2>Log a bake</h2>
+      <form id="entryForm" onsubmit="submitEntry(event)">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="entryDate" value="${todayStr()}" required>
+        </div>
+        <div class="field">
+          <label>Bake title</label>
+          <input type="text" id="entryTitle" placeholder="e.g. Weekend country boule" required>
+        </div>
+        <div class="field">
+          <label>Recipe used (optional)</label>
+          <select id="entryRecipe"><option value="">None / not sure</option>${recipeOptions}</select>
+        </div>
+        <div class="field">
+          <label>What went wrong? (select any that apply)</label>
+          ${renderSymptomChecks()}
+        </div>
+        <div class="field">
+          <label>Likely causes (auto-suggested from your symptoms)</label>
+          <div id="suggestedCausesPreview">${renderSuggestedCausesPreview()}</div>
+        </div>
+        <div class="field">
+          <label>Describe what happened</label>
+          <textarea id="entryDescription" placeholder="Crumb was tight, loaf didn't rise much, crust stayed pale..."></textarea>
+        </div>
+        <div class="field">
+          <label>Your own notes on the cause (optional)</label>
+          <textarea id="entryCauseNotes" placeholder="Anything you suspect that's specific to this bake..."></textarea>
+        </div>
+        <div class="field">
+          <label>Photo (optional)</label>
+          <input type="file" accept="image/*" id="entryPhotoInput" onchange="handleEntryPhoto(event)">
+          <img id="entryPhotoPreview" class="photo-preview" style="display:none;">
+        </div>
+        <div class="field">
+          <label>What will you change next time?</label>
+          <textarea id="entryPlannedChange" placeholder="e.g. Extend bulk fermentation by 1 hour, use starter closer to peak..."></textarea>
+        </div>
+        <button type="submit" class="btn block">Save bake log</button>
+      </form>
+    </div>
+  `;
+}
+
+function handleEntryPhoto(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  resizeImage(file, dataUrl => {
+    pendingPhoto = dataUrl;
+    const img = document.getElementById('entryPhotoPreview');
+    img.src = dataUrl; img.style.display='block';
+  });
+}
+
+async function submitEntry(e){
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type=submit]');
+  if(btn){ btn.disabled = true; btn.textContent = 'Saving…'; }
+  const recipeId = document.getElementById('entryRecipe').value || null;
+  const causes = [];
+  selectedSymptoms.forEach(id=>{
+    const lib = SYMPTOM_LIBRARY.find(s=>s.id===id);
+    if(lib) lib.causes.forEach(c=>{ if(!causes.includes(c)) causes.push(c); });
+  });
+  const photoUrl = await uploadPendingPhoto(pendingPhoto, 'logs');
+  const { data, error } = await sb.from('sourdough_logs').insert({
+    user_id: currentUser.id,
+    log_date: document.getElementById('entryDate').value || todayStr(),
+    title: document.getElementById('entryTitle').value.trim(),
+    recipe_id: recipeId,
+    symptoms: [...selectedSymptoms],
+    description: document.getElementById('entryDescription').value.trim(),
+    my_cause_notes: document.getElementById('entryCauseNotes').value.trim(),
+    suggested_causes: causes,
+    planned_change: document.getElementById('entryPlannedChange').value.trim(),
+    photo_url: photoUrl
+  }).select('id').single();
+  if(error){
+    showToast('⚠️ Could not save: '+error.message);
+    if(btn){ btn.disabled = false; btn.textContent = 'Save bake log'; }
+    return;
+  }
+  showToast('Bake logged 🍞');
+  await loadData();
+  currentEntryId = data.id;
+  currentView = 'entryDetail';
+  render();
+  window.scrollTo(0,0);
+}
+
+/* ============================= FOLLOW-UP MODAL ============================= */
+
+function openFollowupModal(entryId){
+  pendingFollowupPhoto = null;
+  const modalRoot = document.getElementById('modalRoot');
+  modalRoot.innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <h2>Add follow-up</h2>
+        <p style="color:var(--muted);">How did it go after you made the change?</p>
+        <form onsubmit="submitFollowup(event,'${entryId}')">
+          <div class="field">
+            <label>Date</label>
+            <input type="date" id="fuDate" value="${todayStr()}" required>
+          </div>
+          <div class="field">
+            <label>Result</label>
+            <select id="fuResult" required>
+              <option value="solved">✅ Fully solved</option>
+              <option value="better">📈 Better</option>
+              <option value="same">➡️ About the same</option>
+              <option value="worse">📉 Worse</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Notes</label>
+            <textarea id="fuNotes" placeholder="What did you notice this time?"></textarea>
+          </div>
+          <div class="field">
+            <label>Photo (optional)</label>
+            <input type="file" accept="image/*" onchange="handleFollowupPhoto(event)">
+            <img id="fuPhotoPreview" class="photo-preview" style="display:none;">
+          </div>
+          <button type="submit" class="btn block">Save follow-up</button>
+        </form>
+      </div>
+    </div>
+  `;
+}
+function handleFollowupPhoto(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  resizeImage(file, dataUrl=>{
+    pendingFollowupPhoto = dataUrl;
+    const img = document.getElementById('fuPhotoPreview');
+    img.src = dataUrl; img.style.display='block';
+  });
+}
+async function submitFollowup(e, entryId){
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type=submit]');
+  if(btn){ btn.disabled = true; btn.textContent = 'Saving…'; }
+  const photoUrl = await uploadPendingPhoto(pendingFollowupPhoto, 'followups');
+  const { error } = await sb.from('sourdough_followups').insert({
+    user_id: currentUser.id,
+    log_id: entryId,
+    followup_date: document.getElementById('fuDate').value || todayStr(),
+    result: document.getElementById('fuResult').value,
+    notes: document.getElementById('fuNotes').value.trim(),
+    photo_url: photoUrl
+  });
+  if(error){
+    showToast('⚠️ Could not save follow-up: '+error.message);
+    if(btn){ btn.disabled = false; btn.textContent = 'Save follow-up'; }
+    return;
+  }
+  closeModal();
+  showToast('Follow-up saved');
+  currentEntryId = entryId;
+  currentView = 'entryDetail';
+  await loadData();
+}
+function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
+
+/* ============================= RECIPES ============================= */
+
+function renderRecipes(){
+  const all = [...state.recipes].sort((a,b)=> a.title.localeCompare(b.title));
+  const list = all.filter(r => recipeFilter==='all' ? true : recipeFilter==='web' ? !!r.sourceUrl : !r.sourceUrl);
+  const webCount = all.filter(r=>r.sourceUrl).length;
+  return `
+    <div class="section-title" style="margin-top:0;">
+      <h2>Recipes</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="btn small secondary" onclick="openSaveFromWebModal()">🌐 Save from web</button>
+        <button class="btn small" onclick="startNewRecipe()">+ Add recipe</button>
+      </div>
+    </div>
+    ${all.length ? `
+      <div class="filter-tabs">
+        <button class="filter-tab ${recipeFilter==='all'?'active':''}" onclick="setRecipeFilter('all')">All (${all.length})</button>
+        <button class="filter-tab ${recipeFilter==='own'?'active':''}" onclick="setRecipeFilter('own')">My own (${all.length-webCount})</button>
+        <button class="filter-tab ${recipeFilter==='web'?'active':''}" onclick="setRecipeFilter('web')">🌐 Saved from web (${webCount})</button>
+      </div>
+    ` : ''}
+    ${list.length ? list.map(r => `
+      <div class="card card-tap" onclick="openRecipe('${r.id}')">
+        <div class="entry-top">
+          <div class="meta">
+            ${r.sourceUrl ? '<div class="web-badge">🌐 '+escapeHtml(r.sourceName || 'Saved from web')+'</div>' : ''}
+            <h4>${escapeHtml(r.title)}</h4>
+            <div class="recipe-meta">
+              ${r.category ? '<span>'+escapeHtml(r.category)+'</span>' : ''}
+              ${r.hydration ? '<span>'+escapeHtml(r.hydration)+'% hydration</span>' : ''}
+            </div>
+          </div>
+          ${r.photo ? '<img class="thumb" src="'+r.photo+'">' : ''}
+        </div>
+      </div>
+    `).join('') : `
+      <div class="card empty-state">
+        <div class="big">📖</div>
+        <p>${all.length ? 'No recipes in this view.' : 'No recipes saved yet. Store the ones you bake — or clip one from a website — so you can link them to future bake logs.'}</p>
+        ${all.length ? '' : `
+          <div class="quick-actions" style="justify-content:center;">
+            <button class="btn" onclick="startNewRecipe()">Add your first recipe</button>
+            <button class="btn secondary" onclick="openSaveFromWebModal()">Save one from the web</button>
+          </div>
+        `}
+      </div>
+    `}
+  `;
+}
+function setRecipeFilter(f){
+  recipeFilter = f;
+  document.getElementById('app').innerHTML = renderRecipes();
+}
+
+function openRecipe(id){
+  currentRecipeId = id;
+  const r = state.recipes.find(x=>x.id===id);
+  const modalRoot = document.getElementById('modalRoot');
+  modalRoot.innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        ${r.sourceUrl ? '<div class="web-badge">🌐 '+escapeHtml(r.sourceName || 'Saved from web')+'</div>' : ''}
+        <h2>${escapeHtml(r.title)}</h2>
+        <div class="recipe-meta">
+          ${r.category ? '<span>'+escapeHtml(r.category)+'</span>' : ''}
+          ${r.hydration ? '<span>'+escapeHtml(r.hydration)+'% hydration</span>' : ''}
+        </div>
+        ${r.sourceUrl ? '<a class="source-link" href="'+escapeHtml(r.sourceUrl)+'" target="_blank" rel="noopener">🔗 View original recipe'+(r.sourceName? ' on '+escapeHtml(r.sourceName):'')+'</a>' : ''}
+        ${r.photo ? '<img class="photo-preview" src="'+r.photo+'">' : ''}
+        ${r.ingredients && r.ingredients.length ? `
+          <div class="divider"></div>
+          <h4>Ingredients</h4>
+          <ul style="margin:0 0 0 18px;padding:0;">
+            ${r.ingredients.map(ing=>'<li>'+escapeHtml(ing.amount)+' '+escapeHtml(ing.name)+'</li>').join('')}
+          </ul>
+        ` : ''}
+        ${r.steps && r.steps.length ? `
+          <div class="divider"></div>
+          <h4>Steps</h4>
+          ${r.steps.map((s,i)=>'<div class="step"><div class="step-num">'+(i+1)+'</div><div class="step-body">'+nl2br(s)+'</div></div>').join('')}
+        ` : ''}
+        ${r.notes ? `<div class="divider"></div><h4>Notes</h4><p>${nl2br(r.notes)}</p>` : ''}
+        <div class="quick-actions" style="margin-top:14px;">
+          <button class="btn secondary" onclick="closeModal(); editRecipe('${r.id}')">Edit</button>
+          <button class="btn danger" onclick="deleteRecipe('${r.id}')">Delete</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function deleteRecipe(id){
+  if(!confirm('Delete this recipe?')) return;
+  const { error } = await sb.from('sourdough_recipes').delete().eq('id', id);
+  if(error){ showToast('⚠️ Could not delete: '+error.message); return; }
+  closeModal();
+  showToast('Recipe deleted');
+  await loadData();
+  goTo('recipes');
+}
+
+function startNewRecipe(){
+  currentRecipeId = null;
+  pendingRecipePhoto = null;
+  recipeIngredientRows = [{name:'',amount:''}];
+  recipeStepRows = [''];
+  currentView = 'recipeForm';
+  render();
+  window.scrollTo(0,0);
+}
+function editRecipe(id){
+  const r = state.recipes.find(x=>x.id===id);
+  if(!r) return;
+  currentRecipeId = id;
+  pendingRecipePhoto = r.photo || null;
+  recipeIngredientRows = r.ingredients && r.ingredients.length ? r.ingredients.map(i=>({...i})) : [{name:'',amount:''}];
+  recipeStepRows = r.steps && r.steps.length ? [...r.steps] : [''];
+  currentView = 'recipeForm';
+  render();
+  window.scrollTo(0,0);
+}
+
+function addIngredientRow(){
+  recipeIngredientRows.push({name:'',amount:''});
+  document.getElementById('ingredientRows').outerHTML = renderIngredientRows();
+}
+function removeIngredientRow(i){
+  recipeIngredientRows.splice(i,1);
+  if(!recipeIngredientRows.length) recipeIngredientRows.push({name:'',amount:''});
+  document.getElementById('ingredientRows').outerHTML = renderIngredientRows();
+}
+function updateIngredientRow(i, field, val){ recipeIngredientRows[i][field] = val; }
+
+function addStepRow(){
+  recipeStepRows.push('');
+  document.getElementById('stepRows').outerHTML = renderStepRows();
+}
+function removeStepRow(i){
+  recipeStepRows.splice(i,1);
+  if(!recipeStepRows.length) recipeStepRows.push('');
+  document.getElementById('stepRows').outerHTML = renderStepRows();
+}
+function updateStepRow(i, val){ recipeStepRows[i] = val; }
+
+function renderIngredientRows(){
+  return '<div id="ingredientRows">' + recipeIngredientRows.map((row,i)=>`
+    <div class="ingredient-row">
+      <input type="text" placeholder="Amount (e.g. 500g)" value="${escapeHtml(row.amount)}" oninput="updateIngredientRow(${i},'amount',this.value)">
+      <input type="text" placeholder="Ingredient" value="${escapeHtml(row.name)}" oninput="updateIngredientRow(${i},'name',this.value)">
+      <button type="button" class="remove-row" onclick="removeIngredientRow(${i})">✕</button>
+    </div>
+  `).join('') + '<button type="button" class="btn secondary small" onclick="addIngredientRow()">+ Add ingredient</button></div>';
+}
+function renderStepRows(){
+  return '<div id="stepRows">' + recipeStepRows.map((s,i)=>`
+    <div class="step-row">
+      <div class="step-num">${i+1}</div>
+      <textarea placeholder="Describe this step" oninput="updateStepRow(${i},this.value)">${escapeHtml(s)}</textarea>
+      <button type="button" class="remove-row" onclick="removeStepRow(${i})">✕</button>
+    </div>
+  `).join('') + '<button type="button" class="btn secondary small" onclick="addStepRow()">+ Add step</button></div>';
+}
+
+function handleRecipePhoto(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  resizeImage(file, dataUrl=>{
+    pendingRecipePhoto = dataUrl;
+    const img = document.getElementById('recipePhotoPreview');
+    img.src = dataUrl; img.style.display='block';
+  });
+}
+
+function renderRecipeForm(){
+  const r = currentRecipeId ? state.recipes.find(x=>x.id===currentRecipeId) : null;
+  return `
+    <div class="back-row"><button class="btn secondary small" onclick="goTo('recipes')">← Cancel</button></div>
+    <div class="card">
+      <h2>${r ? 'Edit recipe' : 'Add recipe'}</h2>
+      <form onsubmit="submitRecipe(event)">
+        <div class="field">
+          <label>Recipe name</label>
+          <input type="text" id="recTitle" value="${r?escapeHtml(r.title):''}" placeholder="e.g. Everyday Country Boule" required>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Category</label>
+            <select id="recCategory">
+              ${['Boule/Loaf','Batard','Baguette','Focaccia','Rolls','Bagels','Starter/Levain','Other'].map(c=>'<option '+(r&&r.category===c?'selected':'')+'>'+c+'</option>').join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label>Hydration %</label>
+            <input type="number" id="recHydration" value="${r&&r.hydration?r.hydration:''}" placeholder="e.g. 75">
+          </div>
+        </div>
+        <div class="field">
+          <label>Saved from a website? (optional)</label>
+          <div class="grid-2">
+            <input type="text" id="recSourceName" value="${r&&r.sourceName?escapeHtml(r.sourceName):''}" placeholder="Site name (e.g. King Arthur Baking)">
+            <input type="text" id="recSourceUrl" value="${r&&r.sourceUrl?escapeHtml(r.sourceUrl):''}" placeholder="Paste the link here">
+          </div>
+          <div class="hint">Leave blank for your own recipes.</div>
+        </div>
+        <div class="field">
+          <label>Ingredients</label>
+          ${renderIngredientRows()}
+        </div>
+        <div class="field">
+          <label>Steps</label>
+          ${renderStepRows()}
+        </div>
+        <div class="field">
+          <label>Notes</label>
+          <textarea id="recNotes" placeholder="Timing, tips, variations you like...">${r&&r.notes?escapeHtml(r.notes):''}</textarea>
+        </div>
+        <div class="field">
+          <label>Photo (optional)</label>
+          <input type="file" accept="image/*" onchange="handleRecipePhoto(event)">
+          <img id="recipePhotoPreview" class="photo-preview" src="${pendingRecipePhoto||''}" style="display:${pendingRecipePhoto?'block':'none'};">
+        </div>
+        <button type="submit" class="btn block">${r?'Save changes':'Save recipe'}</button>
+      </form>
+    </div>
+  `;
+}
+
+async function submitRecipe(e){
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type=submit]');
+  if(btn){ btn.disabled = true; btn.textContent = 'Saving…'; }
+  const ingredients = recipeIngredientRows.filter(row=>row.name.trim()||row.amount.trim());
+  const steps = recipeStepRows.map(s=>s.trim()).filter(Boolean);
+  const photoUrl = await uploadPendingPhoto(pendingRecipePhoto, 'recipes');
+  const payload = {
+    title: document.getElementById('recTitle').value.trim(),
+    category: document.getElementById('recCategory').value,
+    hydration: document.getElementById('recHydration').value.trim(),
+    source_name: document.getElementById('recSourceName').value.trim(),
+    source_url: document.getElementById('recSourceUrl').value.trim(),
+    ingredients,
+    steps,
+    notes: document.getElementById('recNotes').value.trim(),
+    photo_url: photoUrl
+  };
+  let error;
+  if(currentRecipeId){
+    ({ error } = await sb.from('sourdough_recipes').update(payload).eq('id', currentRecipeId));
+  } else {
+    payload.user_id = currentUser.id;
+    ({ error } = await sb.from('sourdough_recipes').insert(payload));
+  }
+  if(error){
+    showToast('⚠️ Could not save recipe: '+error.message);
+    if(btn){ btn.disabled = false; btn.textContent = currentRecipeId ? 'Save changes' : 'Save recipe'; }
+    return;
+  }
+  showToast('Recipe saved 📖');
+  await loadData();
+  goTo('recipes');
+}
+
+/* ============================= SAVE RECIPE FROM WEB ============================= */
+
+function openSaveFromWebModal(){
+  const modalRoot = document.getElementById('modalRoot');
+  modalRoot.innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <h2>🌐 Save a recipe from the web</h2>
+        <p style="color:var(--muted);">Found something worth trying? Paste the link now and fill in the details whenever you're ready — you can always come back and add ingredients, steps, or a photo later.</p>
+        <form onsubmit="submitWebRecipe(event)">
+          <div class="field">
+            <label>Recipe name</label>
+            <input type="text" id="webRecTitle" placeholder="e.g. 75% Hydration Country Loaf" required>
+          </div>
+          <div class="field">
+            <label>Link to the recipe</label>
+            <input type="text" id="webRecUrl" placeholder="Paste the URL here" required>
+          </div>
+          <div class="field">
+            <label>Site name (optional)</label>
+            <input type="text" id="webRecSourceName" placeholder="e.g. King Arthur Baking, a blog, a YouTube channel...">
+          </div>
+          <div class="field">
+            <label>Quick notes (optional)</label>
+            <textarea id="webRecNotes" placeholder="Why you saved it, what looked interesting, substitutions to try..."></textarea>
+          </div>
+          <button type="submit" class="btn block">Save link</button>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+async function submitWebRecipe(e){
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type=submit]');
+  if(btn){ btn.disabled = true; btn.textContent = 'Saving…'; }
+  const { error } = await sb.from('sourdough_recipes').insert({
+    user_id: currentUser.id,
+    title: document.getElementById('webRecTitle').value.trim(),
+    category: 'Other',
+    hydration: '',
+    source_name: document.getElementById('webRecSourceName').value.trim(),
+    source_url: document.getElementById('webRecUrl').value.trim(),
+    ingredients: [],
+    steps: [],
+    notes: document.getElementById('webRecNotes').value.trim(),
+    photo_url: null
+  });
+  if(error){
+    showToast('⚠️ Could not save: '+error.message);
+    if(btn){ btn.disabled = false; btn.textContent = 'Save link'; }
+    return;
+  }
+  closeModal();
+  showToast('Recipe link saved 🌐');
+  recipeFilter = 'all';
+  await loadData();
+  goTo('recipes');
+}
+
+/* ============================= TROUBLESHOOTING GUIDE ============================= */
+
+function renderGuide(){
+  const q = guideSearch.toLowerCase();
+  const items = SYMPTOM_LIBRARY.filter(s => !q || s.symptom.toLowerCase().includes(q) || s.causes.join(' ').toLowerCase().includes(q));
+  return `
+    <div class="card">
+      <h2>Troubleshooting guide</h2>
+      <p style="color:var(--muted);">A quick reference for common sourdough problems. Tap "Log this" to start a bake entry pre-filled with that symptom.</p>
+      <div class="search-box">
+        <input type="text" placeholder="Search symptoms (e.g. gummy, flat, sour)..." value="${escapeHtml(guideSearch)}" oninput="updateGuideSearch(this.value)">
+      </div>
+      ${items.map(s => `
+        <div class="lib-item">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+            <h4>${escapeHtml(s.symptom)}</h4>
+            <button class="link-btn" onclick="startNewEntry('${s.id}')">Log this →</button>
+          </div>
+          <strong style="font-size:13px;color:var(--muted);">Likely causes</strong>
+          <ul>${s.causes.map(c=>'<li>'+escapeHtml(c)+'</li>').join('')}</ul>
+          <strong style="font-size:13px;color:var(--muted);">What to try</strong>
+          <ul>${s.fixes.map(f=>'<li>'+escapeHtml(f)+'</li>').join('')}</ul>
+        </div>
+      `).join('') || '<p class="hint">No matches. Try a different search term.</p>'}
+    </div>
+  `;
+}
+function updateGuideSearch(v){
+  guideSearch = v;
+  document.getElementById('app').innerHTML = renderGuide();
+  // restore focus to search input
+  const input = document.querySelector('.search-box input');
+  if(input){ input.focus(); input.setSelectionRange(v.length, v.length); }
+}
+
+/* ============================= GETTING STARTED ============================= */
+
+function renderStart(){
+  return `
+    <div class="card">
+      <h2>Getting started with sourdough</h2>
+      <p style="color:var(--muted);">A beginner roadmap, plus the tools worth having before your first bake.</p>
+      ${GETTING_STARTED_STEPS.map((s,i)=>`
+        <div class="step">
+          <div class="step-num">${i+1}</div>
+          <div class="step-body"><h4>${escapeHtml(s.title)}</h4><p>${escapeHtml(s.body)}</p></div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="card">
+      <h3>Essential tools</h3>
+      <ul class="tool-list">
+        ${TOOLS_ESSENTIAL.map(([icon,name,desc])=>`<li><span>${icon}</span><div><strong>${escapeHtml(name)}</strong><br><span style="color:var(--muted);font-size:13px;">${escapeHtml(desc)}</span></div></li>`).join('')}
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Nice to have</h3>
+      <ul class="tool-list">
+        ${TOOLS_NICE.map(([icon,name,desc])=>`<li><span>${icon}</span><div><strong>${escapeHtml(name)}</strong><br><span style="color:var(--muted);font-size:13px;">${escapeHtml(desc)}</span></div></li>`).join('')}
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Glossary</h3>
+      <ul class="tool-list">
+        ${GLOSSARY.map(([term,def])=>`<li><div><strong>${escapeHtml(term)}</strong><br><span style="color:var(--muted);font-size:13px;">${escapeHtml(def)}</span></div></li>`).join('')}
+      </ul>
+    </div>
+  `;
+}
+
+/* ============================= SETTINGS / BACKUP ============================= */
+
+function openSettings(){
+  const modalRoot = document.getElementById('modalRoot');
+  modalRoot.innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <h2>Account &amp; settings</h2>
+        <p style="color:var(--muted);">Signed in as <strong>${escapeHtml(currentUser ? currentUser.email : '')}</strong>. Your bakes and recipes sync automatically to every device you sign into.</p>
+        <button class="btn secondary block" onclick="handleSignOut()">Sign out</button>
+        <div class="divider"></div>
+        <div class="quick-actions">
+          <button class="btn" onclick="exportData()">⬇️ Export backup (.json)</button>
+          <button class="btn secondary" onclick="document.getElementById('importFile').click()">⬆️ Import backup</button>
+        </div>
+        <input type="file" id="importFile" accept="application/json" style="display:none;" onchange="importData(event)">
+        <div class="hint">Import adds recipes/bakes from an old backup into your account — it won't overwrite what's already here. Embedded photos from very old local backups aren't carried over.</div>
+        <div class="divider"></div>
+        <p style="font-size:13px;color:var(--muted);">Tip on your phone: open this page in Safari or Chrome, then use "Add to Home Screen" for a full-screen app icon.</p>
+        <div class="divider"></div>
+        <button class="btn danger block" onclick="clearAllData()">Erase all my data</button>
+      </div>
+    </div>
+  `;
+}
+function exportData(){
+  const payload = { recipes: state.recipes, logs: state.logs, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'sourdough-companion-backup-'+todayStr()+'.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Backup downloaded');
+}
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async function(evt){
+    try{
+      const data = JSON.parse(evt.target.result);
+      if(!data.recipes || !data.logs) throw new Error('bad format');
+      if(!confirm('This will add '+data.recipes.length+' recipe(s) and '+data.logs.length+' bake log(s) from the backup into your account. Continue?')) return;
+      showToast('Importing…');
+      const recipeIdMap = {};
+      for(const r of data.recipes){
+        const { data: inserted, error } = await sb.from('sourdough_recipes').insert({
+          user_id: currentUser.id,
+          title: r.title, category: r.category || null, hydration: r.hydration || null,
+          source_name: r.sourceName || null, source_url: r.sourceUrl || null,
+          ingredients: r.ingredients || [], steps: r.steps || [], notes: r.notes || null,
+          photo_url: (r.photo && r.photo.startsWith('http')) ? r.photo : null
+        }).select('id').single();
+        if(!error && inserted) recipeIdMap[r.id] = inserted.id;
+      }
+      for(const l of data.logs){
+        const { data: insertedLog, error } = await sb.from('sourdough_logs').insert({
+          user_id: currentUser.id,
+          log_date: l.date || todayStr(), title: l.title || null,
+          recipe_id: l.recipeId ? (recipeIdMap[l.recipeId] || null) : null,
+          symptoms: l.symptoms || [], description: l.description || null,
+          my_cause_notes: l.myCauseNotes || null, suggested_causes: l.suggestedCauses || [],
+          planned_change: l.plannedChange || null,
+          photo_url: (l.photo && l.photo.startsWith('http')) ? l.photo : null
+        }).select('id').single();
+        if(!error && insertedLog && l.followUps && l.followUps.length){
+          for(const fu of l.followUps){
+            await sb.from('sourdough_followups').insert({
+              user_id: currentUser.id, log_id: insertedLog.id,
+              followup_date: fu.date || todayStr(), result: fu.result || 'same',
+              notes: fu.notes || null,
+              photo_url: (fu.photo && fu.photo.startsWith('http')) ? fu.photo : null
+            });
+          }
+        }
+      }
+      closeModal();
+      await loadData();
+      goTo('home');
+      showToast('Backup imported ✅');
+    }catch(err){
+      console.error(err);
+      alert('That file doesn\'t look like a valid backup.');
+    }
+  };
+  reader.readAsText(file);
+}
+async function clearAllData(){
+  if(!confirm('This permanently erases every bake and recipe in your account. Export a backup first if you want to keep it. Continue?')) return;
+  await sb.from('sourdough_logs').delete().eq('user_id', currentUser.id);
+  await sb.from('sourdough_recipes').delete().eq('user_id', currentUser.id);
+  closeModal();
+  await loadData();
+  goTo('home');
+  showToast('All data erased');
+}
+
+/* ============================= INIT ============================= */
+
+initAuth();
+
+// Register service worker for offline support + installability.
+// Silently no-ops if unsupported (e.g. opened directly as a local file).
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{ /* not hosted over http(s) — fine, app still works */ });
+  });
+}
+</script>
+</body>
+</html>
